@@ -6,8 +6,6 @@ import { compareSync } from 'bcrypt-ts-edge';
 import type { NextAuthConfig } from 'next-auth';
 import { cookies } from 'next/headers';
 
-import { NextResponse } from 'next/server';
-
 export const config = {
   pages: {
     signIn: '/sign-in',
@@ -53,6 +51,7 @@ export const config = {
     }),
   ],
   callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, user, trigger, token }: any) {
       // Set the user ID from the token
       session.user.id = token.sub;
@@ -66,6 +65,7 @@ export const config = {
 
       return session;
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async jwt({ token, user, trigger, session }: any) {
       if (user) {
         token.id = user.id;
@@ -102,48 +102,6 @@ export const config = {
         token.name = session.user.name;
       }
       return token;
-    },
-    authorized({ request, auth }: any) {
-      //Array of regex patterns of paths we want to protect
-      const protectedPaths = [
-        /\/shipping-address/,
-        /\/payment-method/,
-        /\/place-order/,
-        /\/profile/,
-        /\/user\/(.*)/,
-        /\/order\/(.*)/,
-        /\/admin/,
-      ];
-
-      // Get pathname from the req URL Object
-      const { pathname } = request.nextUrl;
-
-      // Check if user is not authenticated and protected path
-      if (!auth && protectedPaths.some((path) => path.test(pathname)))
-        return false;
-      // Check for cart cookie
-      if (!request.cookies.get('sessionCartId')) {
-        // Generate cart cookie
-        const sessionCartId = crypto.randomUUID();
-
-        // Clone the request headers
-        const newRequestHeaders = new Headers(request.headers);
-
-        // Create a new response and add the new headers
-        const response = NextResponse.next({
-          request: {
-            headers: newRequestHeaders,
-          },
-        });
-
-        // Set the newly generated sessionCartId in the response cookies
-        response.cookies.set('sessionCartId', sessionCartId);
-
-        // Return the response with the sessionCartId set
-        return response;
-      } else {
-        return true;
-      }
     },
   },
 } satisfies NextAuthConfig;
