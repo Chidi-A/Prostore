@@ -22,21 +22,23 @@ import {
 import {
   createPaypalOrder,
   approvePaypalOrder,
-  deliverOrder,
 } from '@/lib/actions/order.actions';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useTransition } from 'react';
+import StripePayment from './stripe-payment';
 
 const OrderDetailsTable = ({
   order,
   paypalClientId,
+  stripeClientSecret,
   isAdmin,
   updateOrderToPaid,
   deliverOrder,
 }: {
   order: Order;
   paypalClientId: string;
+  stripeClientSecret: string | null;
   isAdmin: boolean;
   updateOrderToPaid: (
     orderId: string
@@ -249,6 +251,14 @@ const OrderDetailsTable = ({
                     onApprove={handleApprovePaypalOrder}
                   />
                 </PayPalScriptProvider>
+              )}
+              {/* Stripe payment */}
+              {!isPaid && paymentMethod === 'Stripe' && stripeClientSecret && (
+                <StripePayment
+                  priceInCents={Number(order.totalPrice) * 100}
+                  orderId={id}
+                  clientSecret={stripeClientSecret}
+                />
               )}
               {/* COD payment */}
               {isAdmin && !isPaid && paymentMethod === 'CashOnDelivery' && (

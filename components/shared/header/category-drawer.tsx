@@ -16,7 +16,7 @@ const CategoryDrawer = async () => {
 
   return (
     <Drawer direction="left">
-      <DrawerTrigger>
+      <DrawerTrigger asChild>
         <Button variant="outline">
           <MenuIcon />
         </Button>
