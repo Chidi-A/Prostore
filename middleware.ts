@@ -1,9 +1,8 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { auth } from '@/auth';
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protected paths that require authentication
@@ -19,8 +18,12 @@ export async function middleware(request: NextRequest) {
 
   // Check if the current path is protected
   if (protectedPaths.some((path) => path.test(pathname))) {
-    const session = await auth();
-    if (!session) {
+    // Check for NextAuth session tokens (both secure and non-secure variants)
+    const sessionToken =
+      request.cookies.get('authjs.session-token')?.value ||
+      request.cookies.get('__Secure-authjs.session-token')?.value;
+
+    if (!sessionToken) {
       // Redirect to sign-in if no session
       return NextResponse.redirect(new URL('/sign-in', request.url));
     }
