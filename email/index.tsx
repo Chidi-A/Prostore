@@ -23,8 +23,17 @@ export const sendPurchaseReceipt = async ({ order }: { order: Order }) => {
       html: emailHtml,
     });
 
+    // Check if Resend returned an error
+    if (result.error) {
+      throw new Error(`Resend API error: ${JSON.stringify(result.error)}`);
+    }
+
+    // Log the email ID for tracking
+    console.log('Email sent with ID:', result.data?.id);
+
     return result;
   } catch (error) {
+    console.error('Error sending email:', error);
     throw error;
   }
 };
