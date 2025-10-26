@@ -4,14 +4,14 @@ import { Order } from '@/types';
 import PurchaseReceiptEmail from './purchase-receipt';
 import { render } from '@react-email/render';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export const sendPurchaseReceipt = async ({ order }: { order: Order }) => {
   if (!process.env.RESEND_API_KEY) {
     throw new Error(
       'RESEND_API_KEY is not configured in environment variables'
     );
   }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {
     const emailHtml = await render(PurchaseReceiptEmail({ order }));
