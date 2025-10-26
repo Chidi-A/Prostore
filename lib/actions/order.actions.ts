@@ -1,6 +1,6 @@
 'use server';
 
-import { CartItem, PaymentResult } from '@/types';
+import { CartItem, PaymentResult, ShippingAddress } from '@/types';
 
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { formatError } from '../utils';
@@ -15,6 +15,7 @@ import { revalidatePath } from 'next/cache';
 import { PAGE_SIZE } from '../constants';
 import { Decimal } from '@prisma/client/runtime/library';
 import { Order } from '@/types';
+import { sendPurchaseReceipt } from '@/email';
 
 export async function createOrder() {
   try {
@@ -247,6 +248,24 @@ export async function updateOrderToPaid({
   });
 
   if (!updatedOrder) throw new Error('Failed to update order');
+
+  // Send purchase receipt email
+  try {
+    await sendPurchaseReceipt({
+      order: {
+        ...updatedOrder,
+        shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
+        paymentResult: updatedOrder.paymentResult as PaymentResult,
+      },
+    });
+    console.log(
+      'Purchase receipt email sent successfully to:',
+      updatedOrder.user.email
+    );
+  } catch (error) {
+    // Log error but don't throw - we don't want email failure to break the order
+    console.error('Failed to send purchase receipt email:', error);
+  }
 }
 
 // Get user orders

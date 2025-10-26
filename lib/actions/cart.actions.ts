@@ -7,7 +7,6 @@ import { auth } from '@/auth';
 import { prisma } from '@/db/prisma';
 import { cartItemSchema, insertCartSchema } from '../validators';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@prisma/client';
 
 // Calculate cart prices
 const calcPrice = (items: CartItem[]) => {
